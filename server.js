@@ -62,6 +62,8 @@ setInterval(()=>{
     testTemp()
 },2000)
 
+const PORT = process.env.PORT || 3000;
+
 app.listen(3000, () => {
     console.log('Server running at http://localhost:3000');
 });
