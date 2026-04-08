@@ -1,8 +1,10 @@
 const express = require('express');
+const cors=require('cors')
 const app = express();
 
 app.use(express.json());
 app.use(express.static('public'));
+app.use(cors())
 
 let temperature = 0;
 let clients = [];
