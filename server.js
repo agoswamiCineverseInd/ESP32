@@ -1,14 +1,23 @@
 const express = require('express');
-const cors=require('cors')
+const cors = require('cors');
+const path = require('path');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public'));
-app.use(cors())
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ✅ THIS FIXES YOUR ISSUE
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 let temperature = 0;
 let clients = [];
-
 
 app.get('/api/temp', (req, res) => {
     res.json({ temperature });
@@ -19,23 +28,19 @@ app.get('/api/stream', (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
+
     const clientId = Date.now();
-    const newClient = {
-        id: clientId,
-        res
-    };
-    clients.push(newClient);
-    console.log("newClient")
+    clients.push({ id: clientId, res });
+
     res.write(`data: ${JSON.stringify({ temperature })}\n\n`);
+
     req.on('close', () => {
         clients = clients.filter(c => c.id !== clientId);
     });
 });
 
-
 app.get('/api/change/:temp', (req, res) => {
-    const temp = Number(req.params.temp) || 0;
-    temperature=temp;
+    temperature = Number(req.params.temp) || 0;
     sendTemperatureUpdate();
     res.json({ temperature });
 });
@@ -46,24 +51,19 @@ function sendTemperatureUpdate() {
     });
 }
 
-function testTemp() {
-    let curtemp = Math.floor(Math.random() * 30) + 15;
-    temperature = curtemp;
-    sendTemperatureUpdate();
-}
-
 setInterval(() => {
     clients.forEach(client => {
         client.res.write(`: keep-alive\n\n`);
     });
 }, 25000);
 
-setInterval(()=>{
-    testTemp()
-},2000)
+setInterval(() => {
+    temperature = Math.floor(Math.random() * 30) + 15;
+    sendTemperatureUpdate();
+}, 2000);
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log('Server running at http://localhost:3000');
+    console.log(`Server running on port ${PORT}`);
 });
