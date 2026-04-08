@@ -106,51 +106,6 @@ h1 {
     </div>
 </div>
 
-<!-- <script>
-function classifyTemp(temp) {
-    if (temp < 20) return "safe";
-    if (temp < 40) return "normal";
-    return "danger";
-}
-
-function updateUI(temp) {
-    const kelvin = (temp + 273.15).toFixed(2);
-    const fahrenheit = ((temp * 9/5) + 32).toFixed(2);
-
-    document.getElementById("celsius").innerText = temp + "°C";
-    document.getElementById("otherUnits").innerText = `${kelvin} K | ${fahrenheit} °F`;
-
-    const status = classifyTemp(temp);
-    const statusEl = document.getElementById("status");
-
-    statusEl.className = "status " + status;
-
-    if (status === "safe") statusEl.innerText = "SAFE";
-    if (status === "normal") statusEl.innerText = "NORMAL";
-    if (status === "danger") statusEl.innerText = "DANGER";
-
-    const percent = Math.min(100, Math.max(0, temp * 2));
-    document.getElementById("indicator").style.left = percent + "%";
-
-    if (status === "danger") {
-        document.querySelector(".temp-main").style.color = "#ef4444";
-    } else if (status === "normal") {
-        document.querySelector(".temp-main").style.color = "#eab308";
-    } else {
-        document.querySelector(".temp-main").style.color = "#10a37f";
-    }
-}
-
-async function fetchTemp() {
-    const res = await fetch('/api/temp');
-    const data = await res.json();
-    updateUI(data.temperature);
-}
-
-setInterval(fetchTemp, 5000);
-fetchTemp();
-</script> -->
-
 <script>
 function classifyTemp(temp) {
     if (temp < 20) return "safe";
@@ -186,11 +141,11 @@ function updateUI(temp) {
     }
 }
 
-// 🔥 SSE connection with auto-reconnect
+
 let eventSource;
 
 function connectSSE() {
-    eventSource = new EventSource('/api/stream');
+    eventSource = new EventSource('https://esp32-puyl.onrender.com/api/stream');
 
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);

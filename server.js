@@ -8,10 +8,6 @@ let temperature = 0;
 let clients = [];
 
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 app.get('/api/temp', (req, res) => {
     res.json({ temperature });
 });
@@ -35,15 +31,7 @@ app.get('/api/stream', (req, res) => {
 });
 
 
-app.get('/api/increase/:temp', (req, res) => {
-    const temp = Number(req.params.temp) || 0;
-    temperature=temp;
-    sendTemperatureUpdate();
-    res.json({ temperature });
-});
-
-
-app.get('/api/decrease/:temp', (req, res) => {
+app.get('/api/change/:temp', (req, res) => {
     const temp = Number(req.params.temp) || 0;
     temperature=temp;
     sendTemperatureUpdate();
