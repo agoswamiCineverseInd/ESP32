@@ -56,11 +56,6 @@ setInterval(() => {
     });
 }, 25000);
 
-setInterval(() => {
-    temperature = Math.floor(Math.random() * 30) + 15;
-    sendTemperatureUpdate();
-}, 2000);
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
