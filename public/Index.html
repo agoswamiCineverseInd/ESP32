@@ -276,7 +276,7 @@ function connectSSE() {
         const data = JSON.parse(event.data);
         updateUI(data.temperature);
         updateGraph(data.sensorData);
-        updateMotion(data.sensorData.x,data.sensorData.y,data.sensorData.z)
+        updateMotion(Number(data.sensorData.x),Number(data.sensorData.y),Numberdata.sensorData.z)
     };
 
     eventSource.onerror = function() {
