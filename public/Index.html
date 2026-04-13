@@ -205,6 +205,7 @@ const motionChart = new Chart(document.getElementById('motionChart'), {
 });
 
 function updateMotion(x, y, z) {
+    console.log(x,y,z)
     document.getElementById("xVal").innerText = "X: " + x.toFixed(2);
     document.getElementById("yVal").innerText = "Y: " + y.toFixed(2);
     document.getElementById("zVal").innerText = "Z: " + z.toFixed(2);
