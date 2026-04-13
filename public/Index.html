@@ -5,9 +5,9 @@
 <title>Dashboard</title>
 
 <style>
-body {
+    body {
     margin: 0;
-    height: 100vh;
+    min-height: 100vh; /* changed from fixed height */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,8 +16,18 @@ body {
     color: #e5e7eb;
 }
 
+/* Dashboard layout upgrade */
 .dashboard {
-    width: 300px;
+    width: 100%;
+    max-width: 1100px; /* allow expansion */
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr; /* mobile first */
+    gap: 20px;
+}
+
+/* Card wrapper (NEW, keeps your style inside) */
+.card {
     padding: 30px;
     border-radius: 16px;
     background: rgba(20, 25, 32, 0.8);
@@ -27,6 +37,7 @@ body {
     text-align: center;
 }
 
+/* Keep your original styles */
 h1 {
     font-size: 1rem;
     font-weight: 400;
@@ -87,26 +98,92 @@ h1 {
     box-shadow: 0 0 10px #10a37f;
     transition: left 0.4s ease;
 }
+
+/* Chart container (NEW) */
+.chart-container {
+    width: 100%;
+    height: 200px;
+    margin-top: 15px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .dashboard {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .dashboard {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
 </style>
 </head>
 
 <body>
+    <div class="dashboard">
+    <div class="card temp-card">
+        <h1>Temperature</h1>
+        <div class="temp-main" id="celsius">--°C</div>
+        <div class="units" id="otherUnits">-- K | -- °F</div>
+        <div class="status" id="status">--</div>
 
-<div class="dashboard">
-    <h1>Temperature</h1>
-
-    <div class="temp-main" id="celsius">--°C</div>
-
-    <div class="units" id="otherUnits">-- K | -- °F</div>
-
-    <div class="status" id="status">--</div>
-
-    <div class="bar">
-        <div class="indicator" id="indicator"></div>
+        <div class="bar">
+            <div class="indicator" id="indicator"></div>
+        </div>
     </div>
-</div>
 
+    <div class="card motion-card">
+        <h1>Vibration</h1>
+        <div class="chart-container">
+            <canvas id="motionChart"></canvas>
+        </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+
+
+// graph variables
+const maxPoints = 30;
+
+let labels = [];
+let xData = [];
+let yData = [];
+let zData = [];
+
+const motionChart = new Chart(document.getElementById('motionChart'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            { label: 'X', data: xData, borderWidth: 2 },
+            { label: 'Y', data: yData, borderWidth: 2 },
+            { label: 'Z', data: zData, borderWidth: 2 }
+        ]
+    },
+    options: {
+    animation: true,
+    responsive: true,
+    scales: {
+        x: { display: false },
+        y: {
+            suggestedMin: -2,
+            suggestedMax: 2
+        }
+    }
+}
+});
+
+
 function classifyTemp(temp) {
     if (temp < 20) return "safe";
     if (temp < 40) return "normal";
@@ -141,6 +218,27 @@ function updateUI(temp) {
     }
 }
 
+function updateGraphUI(data) {
+    document.getElementById("xVal").innerText = `X: ${data.x.toFixed(2)}`;
+    document.getElementById("yzVal").innerText = `Y: ${data.y.toFixed(2)} | Z: ${data.z.toFixed(2)}`;
+}
+
+function updateGraph(data) {
+    const time = new Date().toLocaleTimeString();
+    labels.push(time);
+    xData.push(data.x);
+    yData.push(data.y);
+    zData.push(data.z);
+
+    if (labels.length > maxPoints) {
+        labels.shift();
+        xData.shift();
+        yData.shift();
+        zData.shift();
+    }
+
+    motionChart.update();
+}
 
 let eventSource;
 
@@ -150,6 +248,7 @@ function connectSSE() {
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
         updateUI(data.temperature);
+        updateGraph(data.sensorData);
     };
 
     eventSource.onerror = function() {

@@ -17,6 +17,11 @@ app.get('/', (req, res) => {
 
 let temperature = 0;
 let clients = [];
+let sensorData = {
+    x: 0,
+    y: 0,
+    z: 0
+};
 
 app.get('/api/temp', (req, res) => {
     res.json({ temperature });
@@ -38,17 +43,35 @@ app.get('/api/stream', (req, res) => {
     });
 });
 
-app.get('/api/change/:temp', (req, res) => {
-    temperature = Number(req.params.temp) || 0;
-    sendTemperatureUpdate();
-    res.json({ temperature });
+app.get('/api/change', (req, res) => {
+     const { temp, x, y, z } = req.query;
+    temperature = Number(temp) || 0;
+    sensorData["x"] =  Number(x) || 0;
+    sensorData["y"] =  Number(y) || 0
+    sensorData["z"] =  Number(z) || 0;
+    sendUpdate();
+    res.json({ "temperature":temperature,"sensorData":sensorData });
 });
 
-function sendTemperatureUpdate() {
+function sendUpdate() {
     clients.forEach(client => {
-        client.res.write(`data: ${JSON.stringify({ temperature })}\n\n`);
+        client.res.write(`data: ${JSON.stringify({ "temperature":temperature,"sensorData":sensorData })}\n\n`);
     });
 }
+
+function generateRandomData() {
+    temperature = Number((20 + Math.random() * 20).toFixed(2)); // 20°C → 40°C
+
+    sensorData.x = (Math.random() * 2 - 1).toFixed(2); // -1 to 1
+    sensorData.y = (Math.random() * 2 - 1).toFixed(2);
+    sensorData.z = (Math.random() * 2 - 1).toFixed(2);
+}
+
+// setInterval(() => {
+//     generateRandomData();   
+//     sendUpdate();
+//     console.log("working")         
+// }, 2000);
 
 setInterval(() => {
     clients.forEach(client => {
