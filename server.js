@@ -67,11 +67,11 @@ function generateRandomData() {
     sensorData.z = (Math.random() * 2 - 1).toFixed(2);
 }
 
-// setInterval(() => {
-//     generateRandomData();   
-//     sendUpdate();
-//     console.log("working")         
-// }, 2000);
+setInterval(() => {
+    generateRandomData();   
+    sendUpdate();
+    console.log("working")         
+}, 2000);
 
 setInterval(() => {
     clients.forEach(client => {
